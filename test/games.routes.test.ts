@@ -39,7 +39,7 @@ describe("Games Routes", () => {
   });
 
   describe("GET /games", () => {
-    it("should return popular games", async () => {
+    it("should return popular games with default offset", async () => {
       vi.mocked(getPopularGames).mockResolvedValue([mockGame]);
 
       const request = new Request("https://example.com/games");
@@ -51,8 +51,26 @@ describe("Games Routes", () => {
       expect(data).toEqual([mockGame]);
 
       expect(getPopularGames).toHaveBeenCalledTimes(1);
+      expect(getPopularGames).toHaveBeenCalledWith(mockEnv, 0);
+
       expect(response.headers.get("Cache-Control")).toBe("public, max-age=900");
     });
+
+    it.each([20, 40])(
+      "should return popular games with offset %i",
+      async (offset) => {
+        vi.mocked(getPopularGames).mockResolvedValue([mockGame]);
+
+        const request = new Request(
+          `https://example.com/games?offset=${offset}`,
+        );
+
+        const response = await handleGamesRoute(request, mockEnv);
+
+        expect(response.status).toBe(200);
+        expect(getPopularGames).toHaveBeenCalledWith(mockEnv, offset);
+      },
+    );
 
     it("should search games when search parameter is provided", async () => {
       vi.mocked(searchGames).mockResolvedValue([mockGame]);
@@ -65,9 +83,42 @@ describe("Games Routes", () => {
       expect(response.status).toBe(200);
       expect(data).toEqual([mockGame]);
 
-      expect(searchGames).toHaveBeenCalledWith(mockEnv, "Thief");
+      expect(searchGames).toHaveBeenCalledWith(mockEnv, "Thief", 0);
       expect(response.headers.get("Cache-Control")).toBe("public, max-age=300");
     });
+
+    it("should search games with the provided offset", async () => {
+      vi.mocked(searchGames).mockResolvedValue([mockGame]);
+
+      const request = new Request(
+        "https://example.com/games?search=Thief&offset=20",
+      );
+
+      const response = await handleGamesRoute(request, mockEnv);
+
+      expect(response.status).toBe(200);
+      expect(searchGames).toHaveBeenCalledWith(mockEnv, "Thief", 20);
+    });
+
+    it.each(["-1", "1.5", "abc", "", " ", "9007199254740992"])(
+      "should reject invalid offset: %s",
+      async (offset) => {
+        const request = new Request(
+          `https://example.com/games?offset=${encodeURIComponent(offset)}`,
+        );
+
+        const response = await handleGamesRoute(request, mockEnv);
+        const data = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(data).toEqual({
+          error: "Offset must be a non-negative integer",
+        });
+
+        expect(getPopularGames).not.toHaveBeenCalled();
+        expect(searchGames).not.toHaveBeenCalled();
+      },
+    );
 
     it("should reject search terms shorter than 2 characters", async () => {
       const request = new Request("https://example.com/games?search=a");
@@ -113,7 +164,6 @@ describe("Games Routes", () => {
       const request = new Request("https://example.com/games/1");
 
       const response = await handleGameDetailsRoute(request, mockEnv, 1);
-
       const data = await response.json();
 
       expect(response.status).toBe(200);

@@ -17,6 +17,23 @@ export async function handleGamesRoute(
   const url = new URL(request.url);
   const searchTerm = url.searchParams.get("search")?.trim();
 
+  const offsetParam = url.searchParams.get("offset");
+  const offset = offsetParam === null ? 0 : Number(offsetParam);
+
+  if (offsetParam !== null && !/^\d+$/.test(offsetParam)) {
+    return jsonResponse(
+      { error: "Offset must be a non-negative integer" },
+      400,
+    );
+  }
+
+  if (!Number.isSafeInteger(offset)) {
+    return jsonResponse(
+      { error: "Offset must be a non-negative integer" },
+      400,
+    );
+  }
+
   if (searchTerm !== undefined && searchTerm !== null) {
     if (searchTerm.length < 2 || searchTerm.length > 100) {
       return jsonResponse(
@@ -28,8 +45,8 @@ export async function handleGamesRoute(
 
   try {
     const games = searchTerm
-      ? await searchGames(env, searchTerm)
-      : await getPopularGames(env);
+      ? await searchGames(env, searchTerm, offset)
+      : await getPopularGames(env, offset);
 
     const cacheSeconds = searchTerm ? 300 : 900;
 

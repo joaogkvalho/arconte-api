@@ -9,7 +9,7 @@ interface IGDBError {
   message?: string;
 }
 
-export async function getPopularGames(env: Env): Promise<Game[]> {
+export async function getPopularGames(env: Env, offset = 0): Promise<Game[]> {
   const accessToken = await getTwitchAccessToken(env);
 
   const query = `
@@ -24,6 +24,7 @@ export async function getPopularGames(env: Env): Promise<Game[]> {
     where rating != null & cover != null;
     sort rating desc;
     limit 20;
+    offset ${offset}; 
     `;
 
   const response = await fetch(IGDB_GAMES_URL, {
@@ -55,6 +56,7 @@ export async function getPopularGames(env: Env): Promise<Game[]> {
 export async function searchGames(
   env: Env,
   searchTerm: string,
+  offset = 0,
 ): Promise<Game[]> {
   const accessToken = await getTwitchAccessToken(env);
 
@@ -71,6 +73,7 @@ export async function searchGames(
       platforms.name,
       cover.url;
     limit 20;
+    offset ${offset};
   `;
 
   const response = await fetch(IGDB_GAMES_URL, {

@@ -82,6 +82,28 @@ describe("IGDB Service", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(getTwitchAccessToken).toHaveBeenCalledTimes(1);
+
+    const requestBody = fetchMock.mock.calls[0][1]?.body;
+
+    expect(requestBody).toContain("limit 20;");
+    expect(requestBody).toContain("offset 0;");
+  });
+
+  it("should fetch popular games with pagination offset", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([mockGame]), {
+        status: 200,
+      }),
+    );
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    await getPopularGames(mockEnv, 20);
+
+    const requestBody = fetchMock.mock.calls[0][1]?.body;
+
+    expect(requestBody).toContain("limit 20;");
+    expect(requestBody).toContain("offset 20;");
   });
 
   it("should search games successfully", async () => {
@@ -101,6 +123,43 @@ describe("IGDB Service", () => {
     const requestBody = fetchMock.mock.calls[0][1]?.body;
 
     expect(requestBody).toContain('search "Thief"');
+
+    expect(requestBody).toContain("limit 20;");
+    expect(requestBody).toContain("offset 0;");
+  });
+
+  it("should search games with pagination offset", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([mockGame]), {
+        status: 200,
+      }),
+    );
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    await searchGames(mockEnv, "Thief", 20);
+
+    const requestBody = fetchMock.mock.calls[0][1]?.body;
+
+    expect(requestBody).toContain('search "Thief"');
+    expect(requestBody).toContain("limit 20;");
+    expect(requestBody).toContain("offset 20;");
+  });
+
+  it("should fetch the third page of popular games", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([mockGame]), {
+        status: 200,
+      }),
+    );
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    await getPopularGames(mockEnv, 40);
+
+    const requestBody = fetchMock.mock.calls[0][1]?.body;
+
+    expect(requestBody).toContain("offset 40;");
   });
 
   it("should fetch game details successfully", async () => {
