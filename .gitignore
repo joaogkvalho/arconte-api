@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Cloudflare
+.wrangler/
+.dev.vars
+.dev.vars.*
+
+# Build
+dist/
+coverage/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# System
+.DS_Store
