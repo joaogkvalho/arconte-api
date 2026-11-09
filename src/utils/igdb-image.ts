@@ -1,6 +1,6 @@
 import type { Game, GameDetails } from "../types/game";
 
-type IGDBImageSize = "cover_big" | "screenshot_1080p";
+type IGDBImageSize = "cover_big" | "1080p";
 
 export function formatIGDBImageUrl(
   imageUrl: string,
@@ -30,7 +30,7 @@ export function normalizeGameImages<T extends Game>(game: T): T {
       ...normalizedGame,
       screenshots: details.screenshots?.map((screenshot) => ({
         ...screenshot,
-        url: formatIGDBImageUrl(screenshot.url, "screenshot_1080p"),
+        url: formatIGDBImageUrl(screenshot.url, "1080p"),
       })),
       similar_games: details.similar_games?.map((similarGame) => ({
         ...similarGame,

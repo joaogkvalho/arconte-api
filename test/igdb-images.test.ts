@@ -23,9 +23,9 @@ describe("IGDB Image Utilities", () => {
       const url =
         "https://images.igdb.com/igdb/image/upload/t_thumb/co698n.jpg";
 
-      const result = formatIGDBImageUrl(url, "screenshot_1080p");
+      const result = formatIGDBImageUrl(url, "1080p");
 
-      expect(result).toContain("/t_screenshot_1080p/");
+      expect(result).toContain("/t_1080p/");
     });
   });
 
@@ -67,7 +67,7 @@ describe("IGDB Image Utilities", () => {
     it("should normalize screenshots to 1080p", () => {
       const result = normalizeGameImages(mockGame);
 
-      expect(result.screenshots?.[0].url).toContain("/t_screenshot_1080p/");
+      expect(result.screenshots?.[0].url).toContain("/t_1080p/");
       expect(result.screenshots?.[0].url.startsWith("https://")).toBe(true);
     });
 

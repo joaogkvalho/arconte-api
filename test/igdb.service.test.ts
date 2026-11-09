@@ -178,7 +178,7 @@ describe("IGDB Service", () => {
 
     expect(game?.cover?.url).toContain("/t_cover_big/");
 
-    expect(game?.screenshots?.[0].url).toContain("/t_screenshot_1080p/");
+    expect(game?.screenshots?.[0].url).toContain("/t_1080p/");
 
     expect(game?.similar_games?.[0].cover?.url).toContain("/t_cover_big/");
   });
